@@ -1,0 +1,9 @@
+src/version.h
+build
+build-dev
+release
+release-dev
+my_htslib
+rovaca
+.vscode
+result/

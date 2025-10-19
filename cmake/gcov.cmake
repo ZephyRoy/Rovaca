@@ -1,0 +1,7 @@
+function(enable_gcov target_name)
+        if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+                message(FATAL_ERROR "Gcov supported only for gcc/clang")
+        endif()
+        target_compile_options(${target_name} PRIVATE -fprofile-arcs -ftest-coverage)
+        target_link_libraries(${target_name} PRIVATE -fprofile-arcs -ftest-coverage -lgcov)
+endfunction()

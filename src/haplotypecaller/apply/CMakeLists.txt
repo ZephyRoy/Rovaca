@@ -1,0 +1,36 @@
+aux_source_directory(common COMMON_SRC)
+aux_source_directory(assemble ASSEMBLE_SRC)
+set(ASSEMBLE_CORE assemble_core)
+set(ASSEMBLE_CORE_SRC ${COMMON_SRC} ${ASSEMBLE_SRC} hc_assemble_utils.c hc_assemble_main.c)
+add_library(${ASSEMBLE_CORE} OBJECT ${ASSEMBLE_CORE_SRC})
+target_compile_options(${ASSEMBLE_CORE} PRIVATE -fgnu89-inline)
+target_include_directories(${ASSEMBLE_CORE} PUBLIC common include include/assemble ../common ../common/base/include ../common/assemble)
+target_link_directories(${ASSEMBLE_CORE} PUBLIC ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+target_link_libraries(${ASSEMBLE_CORE} PUBLIC pthread base)
+
+set(PACK_NAME assemble)
+set(PACK_SRC assemble_engine.cpp assemble_result.cpp)
+set(PACK_INCLUDE_DIR common include include/assemble ../common ../common/base/include ../common/assemble ../genotype ${SPDLOG_INCLUDE_DIR} ../../rovaca_logger)
+set(PACK_LINK_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set(PACK_LINK_LIB ${ASSEMBLE_CORE} genotype logger)
+
+add_library(${PACK_NAME} SHARED ${PACK_SRC})
+target_include_directories(${PACK_NAME} PUBLIC ${PACK_INCLUDE_DIR})
+target_link_directories(${PACK_NAME} PUBLIC ${PACK_LINK_DIR})
+target_link_libraries(${PACK_NAME} PUBLIC ${PACK_LINK_LIB})
+
+if(ENABLE_GOOGLE_TEST)
+    add_subdirectory(test)
+endif()
+
+if(ENABLE_ASAN)
+    include(asan)
+    enable_sanitizer(${PACK_NAME})
+endif()
+
+if(ENABLE_GCOV)
+    include(gcov)
+    enable_gcov(${PACK_NAME})
+endif()
+
+install(TARGETS ${PACK_NAME} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)

@@ -1,0 +1,21 @@
+set(PACK_NAME pairhmm)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-as-needed")
+set_property(SOURCE core/avx2_s.cpp core/avx2_d.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-mavx -mavx2")
+set_property(SOURCE core/avx512_s.cpp core/avx512_d.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-mavx -mavx2 -mavx512f -mavx512dq -mavx512vl")
+set_property(SOURCE rovaca/avx_512_float.cc APPEND_STRING PROPERTY COMPILE_FLAGS "-mavx -mavx2 -mavx512f -mavx512dq -mavx512vl")
+
+set(CORE_SRC core/avx2_s.cpp core/avx2_d.cpp core/avx512_s.cpp core/avx512_d.cpp)
+set(ROVACA_SRC rovaca/avx_512_float.cc rovaca/avx_512_float.h rovaca/common.h)
+set(PACK_SRC ${CORE_SRC} ${ROVACA_SRC} pairhmm_engine.cpp pairhmm_engine.h pairhmm_internal.cpp pairhmm_internal.h)
+set(PACK_INCLUDE_DIR ${HTSLIB_INCLUDE_DIR} ../../rovaca_logger)
+set(PACK_LINK_DIR)
+set(PACK_LINK_LIB logger)
+set(PACK_COMPILE_OPTIONS)
+
+add_library(${PACK_NAME} SHARED ${PACK_SRC})
+target_include_directories(${PACK_NAME} PRIVATE ${PACK_INCLUDE_DIR})
+target_link_directories(${PACK_NAME} PRIVATE ${PACK_LINK_DIR})
+target_link_libraries(${PACK_NAME} PRIVATE ${PACK_LINK_LIB})
+target_compile_options(${PACK_NAME} PRIVATE ${PACK_COMPILE_OPTIONS})
+
+install(TARGETS ${PACK_NAME} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib RUNTIME DESTINATION bin)
